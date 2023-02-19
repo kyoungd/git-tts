@@ -1,0 +1,83 @@
+const axios = require('axios');
+const cors = require('cors');
+const express = require("express");
+const { GenerateSpeech, SpeechFileName } = require('./text2speech.js');
+const { GetNextMessage } = require('./nextMessage.js');
+const SMS = require('./sms.js');
+const CallState = require('./callState.js');
+require('dotenv').config()
+
+const app = express();
+const urlencoded = require('body-parser').urlencoded;
+app.use(urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cors());
+const server = require("http").createServer(app);
+
+app.post("/tts", async (req, res) => {
+  const text = req.body.text;
+  const raw = await GenerateSpeech(text);
+  const block = { result: 'OK', data: raw, message: 'success', filename: SpeechFileName(text) };
+  res.json(block);
+});
+
+app.post('/sms', async(req, res) => {
+  const text = req.body.text;
+  const fromPhone = process.env.FROM_PHONE;
+  const toPhone = req.body.to;
+  const smsText = new SMS();
+  const result = await smsText.SendSMS(fromPhone, toPhone, text);
+  const block = { result: 'OK', data: result, message: 'success' };
+  res.json(block);
+});
+
+//
+// This is the main entry point for the call.
+// properites: { call, reply, template }
+// call is the call object which includes state, but has extra information.
+// reply is he user reply
+// template is the analysis template file
+//
+app.post('/state', async(req, res) => {
+  const message = req.body && req.body.reply ? req.body.reply : '';
+  const templateFile = req.body && req.body.template ? req.body.template : null;
+  const call = req.body && req.body.call ? req.body.call : {};
+  const callState = new CallState(call);
+  callState._input.userInput = message;
+  const result1 = await GetNextMessage(callState.GetState(), message, templateFile);
+  if (result1.status === 200) {
+    callState.State = result1.data;
+    const thisCall = callState.ReturnObject();
+    const block = { result: 'OK', data: thisCall, message: 'success' };
+    res.json(block);
+  }
+  else {
+    console.log(result);
+    throw new Error('Failed to get next message.');  
+  }
+});
+
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
+app.get('/token', async (req, res) => {
+  try {
+    const response = await axios.post('https://api.assemblyai.com/v2/realtime/token', // use account token to get a temp user token
+      { expires_in: 3600 }, // can set a TTL timer in seconds.
+      { headers: { authorization: process.env.ASSEMBLYAI_API_KEY } }); // AssemblyAI API Key goes here
+    const { data } = response;
+    console.log('returned token');
+    res.json(data);
+  } catch (error) {
+    console.log('error getting token - ', error);
+    const {response: {status, data}} = error;
+    res.status(status).json(data);
+  }
+});
+
+// Start server
+// console.log(`Listening at Port ${process.env.PORT | "default PORT=3001. Set PORT environ."}`);
+server.listen(process.env.PORT | 3001);
+
+module.exports = app;
