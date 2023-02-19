@@ -78,6 +78,6 @@ app.get('/token', async (req, res) => {
 
 // Start server
 // console.log(`Listening at Port ${process.env.PORT | "default PORT=3001. Set PORT environ."}`);
-server.listen(process.env.PORT | 3001);
+server.listen(process.env.PORT || 3001);
 
 module.exports = app;
