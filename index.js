@@ -1,18 +1,25 @@
 const axios = require('axios');
 const cors = require('cors');
 const express = require("express");
+const morgan = require('morgan');
+const winston = require('./winston/config');
+require('dotenv').config()
+
 const { GenerateSpeech, SpeechFileName } = require('./text2speech.js');
 const { GetNextMessage } = require('./nextMessage.js');
 const SMS = require('./sms.js');
 const CallState = require('./callState.js');
-require('dotenv').config()
+
 
 const app = express();
+app.use(morgan('combined', { stream: winston.stream }));
 const urlencoded = require('body-parser').urlencoded;
 app.use(urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 const server = require("http").createServer(app);
+
+winston.info('Start winston and morgan logging');
 
 app.post("/tts", async (req, res) => {
   const text = req.body.text;
@@ -39,21 +46,31 @@ app.post('/sms', async(req, res) => {
 // template is the analysis template file
 //
 app.post('/state', async(req, res) => {
-  const message = req.body && req.body.reply ? req.body.reply : '';
-  const templateFile = req.body && req.body.template ? req.body.template : null;
-  const call = req.body && req.body.call ? req.body.call : {};
-  const callState = new CallState(call);
-  callState._input.userInput = message;
-  const result1 = await GetNextMessage(callState.GetState(), message, templateFile);
-  if (result1.status === 200) {
-    callState.State = result1.data;
-    const thisCall = callState.ReturnObject();
-    const block = { result: 'OK', data: thisCall, message: 'success' };
-    res.json(block);
+  try {
+    winston.log(req.body);
+    const message = req.body && req.body.reply ? req.body.reply : '';
+    const templateFile = req.body && req.body.template ? req.body.template : null;
+    const call = req.body && req.body.call ? req.body.call : {};
+    const callState = new CallState(call);
+    callState._input.userInput = message;
+    const result1 = await GetNextMessage(callState.GetState(), message, templateFile);
+    if (result1.status === 200) {
+      callState.State = result1.data;
+      const thisCall = callState.ReturnObject();
+      const block = { result: 'OK', data: thisCall, message: 'success' };
+      res.json(block);
+    }
+    else {
+      winston.log(JSON.stringify(result, null, 4));
+      console.log(result);
+      throw new Error('Failed to get next message.');  
+    }
   }
-  else {
-    console.log(result);
-    throw new Error('Failed to get next message.');  
+  catch (error) {
+    winston.log(error);
+    console.log(error);
+    const block = { result: 'ERROR', data: null, message: error.message };
+    res.json(block);
   }
 });
 
