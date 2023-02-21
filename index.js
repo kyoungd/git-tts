@@ -67,7 +67,7 @@ app.post('/state', async(req, res) => {
     }
   }
   catch (error) {
-    winston.log(error);
+    MessageLog('gpt-tts', 'post /state', error.stack, error)
     console.log(error);
     const block = { result: 'ERROR', data: null, message: error.message };
     res.json(block);
