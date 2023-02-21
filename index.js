@@ -75,7 +75,7 @@ app.post('/state', async(req, res) => {
 });
 
 app.get('/ping', (req, res) => {
-  res.send('pong');
+  res.json({'message': 'pong'});
 });
 
 app.get('/token', async (req, res) => {
