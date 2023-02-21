@@ -47,6 +47,7 @@ app.post('/sms', async(req, res) => {
 //
 app.post('/state', async(req, res) => {
   try {
+    winston.log('info', 'post /state', {req: req.body});
     await MessageLog('gpt-tts', 'post /state', 'called', req.body);
     const message = req.body && req.body.reply ? req.body.reply : '';
     const templateFile = req.body && req.body.template ? req.body.template : null;
@@ -61,7 +62,7 @@ app.post('/state', async(req, res) => {
       res.json(block);
     }
     else {
-      await MessageLog('gpt-tts', 'post /state', 'failed', {});
+      await MessageLog('gpt-tts', 'post /state', 'ERROR, status id not 200', result1);
       console.log(result);
       throw new Error('Failed to get next message.');  
     }
