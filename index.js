@@ -6,7 +6,7 @@ const winston = require('./winston/config');
 require('dotenv').config()
 
 const { GenerateSpeech, SpeechFileName } = require('./text2speech.js');
-const { GetNextMessage } = require('./nextMessage.js');
+const { GetNextMessage, MessageLog } = require('./nextMessage.js');
 const SMS = require('./sms.js');
 const CallState = require('./callState.js');
 
@@ -47,7 +47,7 @@ app.post('/sms', async(req, res) => {
 //
 app.post('/state', async(req, res) => {
   try {
-    winston.log(req.body);
+    await MessageLog('gpt-tts', 'post /state', 'called', req.body);
     const message = req.body && req.body.reply ? req.body.reply : '';
     const templateFile = req.body && req.body.template ? req.body.template : null;
     const call = req.body && req.body.call ? req.body.call : {};
@@ -61,7 +61,7 @@ app.post('/state', async(req, res) => {
       res.json(block);
     }
     else {
-      winston.log(JSON.stringify(result, null, 4));
+      await MessageLog('gpt-tts', 'post /state', 'failed', {});
       console.log(result);
       throw new Error('Failed to get next message.');  
     }

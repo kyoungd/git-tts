@@ -33,5 +33,21 @@ async function GetNextMessageSafe(phoneState, userInput) {
       return {success:false, message:'', reply:''};
     }
   }
-  
-module.exports = { GetNextMessage, GetNextMessageSafe };
+
+async function MessageLog(name, section, log_message='', log_json={}) {
+  try {
+    const url = process.env.MESSAGE_LOG_URL || 'https://simp-admin.herokuapp.com/api/logs';
+    const block = { data: { name, section, log_message, log_json } };
+    const result = await axios.post(url, block, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+    });
+    return result;
+  } catch (error) {
+      console.log(error);
+  }
+  return null;
+}
+
+module.exports = { GetNextMessage, GetNextMessageSafe, MessageLog };
