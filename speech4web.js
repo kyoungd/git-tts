@@ -14,14 +14,14 @@ async function Speech4Web(text) {
           "effectsProfileId": [
               "small-bluetooth-speaker-class-device"
           ],
-          "pitch": `${ai_pitch}`,
-          "speakingRate": `${ai_rate}`,
+          "pitch": 1.2,
+          "speakingRate": 1,
           "audioEncoding": "MP3"
       },
       "input": { text },
       "voice": {
           "languageCode": "en-US",
-          "name": `${ai_name}`
+          "name": "en-US-Neural2-F"
       }
   };
 
