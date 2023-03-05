@@ -25,7 +25,7 @@ async function GetNextMessageSafe(phoneState, userInput) {
         const reply = phoneState.Reply;
         return {success: true, message, reply};
       }
-      console.log(result && result.status_coode ? result.status_code : 'UNKNOWN ERROR');
+      console.log(result && result.status ? result.status_code : 'UNKNOWN ERROR');
       return {success: false, message:'', reply:''};
     }
     catch (err) {

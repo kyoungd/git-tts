@@ -1,0 +1,1 @@
+TypeError: Cannot read properties of undefined (reading 'status')    at /home/young/Desktop/Code/leadgen/gpt-tts/index.js:58:17    at process.processTicksAndRejections (node: internal/process/task_queues:95:5)

@@ -1,6 +1,8 @@
 const axios = require('axios');
 const cors = require('cors');
 const express = require("express");
+const fs = require('fs');
+
 const morgan = require('morgan');
 const winston = require('./winston/config');
 require('dotenv').config()
@@ -10,6 +12,8 @@ const { GetNextMessage, MessageLog } = require('./nextMessage.js');
 const SMS = require('./sms.js');
 const CallState = require('./callState.js');
 
+const Speech4Web = require('./speech4web.js');
+const CreateSpeech = require('./speech_file.js');
 
 const app = express();
 app.use(morgan('combined', { stream: winston.stream }));
@@ -91,6 +95,32 @@ app.get('/token', async (req, res) => {
     console.log('error getting token - ', error);
     const {response: {status, data}} = error;
     res.status(status).json(data);
+  }
+});
+
+app.post('/speech4web', async (req, res) => {
+  try {
+    const text = req.body.text;
+    const filename = await CreateSpeech(text, Speech4Web);
+    const audioFile = fs.createReadStream(filename);
+    audioFile.pipe(res);
+  }
+  catch (error) {
+    console.log('error getting token - ', error);
+    res.status(500);
+  }
+});
+
+app.get('/speech4web', async (req, res) => {
+  try {
+    const text = req.query.text;
+    const filename = await CreateSpeech(text, Speech4Web);
+    const audioFile = fs.createReadStream(filename);
+    audioFile.pipe(res);
+  }
+  catch (error) {
+    console.log('error getting token - ', error);
+    res.status(500);
   }
 });
 

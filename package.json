@@ -15,10 +15,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "fs": "^0.0.1-security",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "supertest": "^6.3.3",
     "twilio": "^3.84.1",
+    "util": "^0.12.5",
     "wavefile": "^11.0.0",
     "winston": "^3.8.2"
   },
