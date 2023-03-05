@@ -4,6 +4,9 @@ require('dotenv').config();
 // console.log('env: ' + process.env.GOOGLE_APPLICATION_CREDENTIALS)
 
 async function Speech4Web(text) {
+  const ai_name = process.env.GOOGLE_AI_VOICE_NAME || 'en-US-Neural2-F';
+  const ai_pitch = Number(process.env.GOOGLE_AI_VOICE_PITCH) || 2.0;
+  const ai_rate = Number(process.env.GOOGLE_AI_VOICE_RATE) || 1;
   const client = new textToSpeech.TextToSpeechClient();
   const request = {
       "audioConfig": {
@@ -11,15 +14,14 @@ async function Speech4Web(text) {
           "effectsProfileId": [
               "small-bluetooth-speaker-class-device"
           ],
-          "pitch": 4.4,
-          "speakingRate": 1,
-          "audioEncoding": "MP3",
-
+          "pitch": `${ai_pitch}`,
+          "speakingRate": `${ai_rate}`,
+          "audioEncoding": "MP3"
       },
       "input": { text },
       "voice": {
           "languageCode": "en-US",
-          "name": "en-US-Neural2-C"
+          "name": `${ai_name}`
       }
   };
 

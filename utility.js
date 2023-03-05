@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 class Utility {
 
     static IsPhoneNumberValid(text) {
@@ -16,4 +19,22 @@ class Utility {
         return isValidNumber;
     }      
 
+    static RemoveAllSoundBytes() {
+        const directoryPath = './soundbytes';
+        fs.readdir(directoryPath, (err, files) => {
+          if (err) throw err;
+        
+          files.forEach(file => {
+            if (path.extname(file) === '.mp3') {
+              fs.unlink(path.join(directoryPath, file), err => {
+                if (err) throw err;
+                console.log(`Successfully deleted ${file}`);
+              });
+            }
+          });
+        });
+    }
+
 }
+
+module.exports = Utility;

@@ -14,6 +14,7 @@ const CallState = require('./callState.js');
 
 const Speech4Web = require('./speech4web.js');
 const CreateSpeech = require('./speech_file.js');
+const Utility = require('./utility.js');
 
 const app = express();
 app.use(morgan('combined', { stream: winston.stream }));
@@ -117,6 +118,20 @@ app.get('/speech4web', async (req, res) => {
     const filename = await CreateSpeech(text, Speech4Web);
     const audioFile = fs.createReadStream(filename);
     audioFile.pipe(res);
+  }
+  catch (error) {
+    console.log('error getting token - ', error);
+    res.status(500);
+  }
+});
+
+app.post('/utility', async (req, res) => {
+  try {
+    const text = req.body.text;
+    if (text === 'reset-soundbytes') {
+      Utility.RemoveAllSoundBytes();
+      res.json({message: "ok"});
+    }
   }
   catch (error) {
     console.log('error getting token - ', error);
